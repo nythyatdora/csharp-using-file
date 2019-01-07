@@ -13,12 +13,14 @@ namespace Using_File
 
             public string ToJSON()
             {
-                String temp = "{\t";
-                temp += "ID: " +  "\"" + ID + "\"" + ",\t";
-                temp += "Name: " + "\"" + Name + "\"" + ",\t";
-                temp += "Price: " + "\"" + Price + "\"" + ",\t";
-                temp += "Quantity: " + "\"" + Quantity + "\"" + "\t},";
-                return temp;
+                String obj = "{\t";
+                obj += $"ID: \"{ID}\",\t";
+                obj += $"Name: \"{Name}\",\t";
+                obj += $"Price: \"{Price}\",\t";
+                obj += $"Quantity: \"{Quantity}\",\t";
+                obj += "},";
+
+                return obj;
             }
         }
     }

@@ -34,37 +34,36 @@ namespace Using_File
             ResizeListView();
         }
 
-        // stuck here for days especially this one
         private TextBox[] GetTextBoxes()
         {
-            var TextBoxes = new List<TextBox>();
-            foreach(Control control in tableLayoutPanel_Input.Controls) // this line that caused me headache
+            var textBoxes = new List<TextBox>();
+            foreach(Control control in tableLayoutPanel_Input.Controls)
             {
-                if(control is TextBox)
+                if(control is TextBox textBox)
                 {
-                    TextBoxes.Add((TextBox)control);
+                    textBoxes.Add(textBox);
                 }
             }
-            return TextBoxes.ToArray();
+            return textBoxes.ToArray();
         }
 
         private bool HasFilled(TextBox[] textBoxes)
         {
-            bool HasAllFilled = true;
+            bool hasAllFilled = true;
             foreach (TextBox textBox in textBoxes)
             {
                 if (string.IsNullOrEmpty(textBox.Text))
                 {
-                    HasAllFilled = false;
+                    hasAllFilled = false;
                     break;
                 }
             }
-            return HasAllFilled;
+            return hasAllFilled;
         }
 
         private void Button_Add_Click(object sender, EventArgs e)
         {
-            if (HasFilled(GetTextBoxes()))
+            if (HasFilled(GetTextBoxes())) // all textboxes are filled
             {
                 var id = Text_Product_ID.Text;
                 var name = Text_Product_Name.Text;
@@ -94,7 +93,7 @@ namespace Using_File
         {
             if (HasSelectedItem())
             {
-                var item = List_Table.SelectedItems[0];
+                var item = List_Table.SelectedItems[0]; // select only one item that being focused on
                 List_Table.Items.Remove(item);
 
                 MessageBox.Show("Selected item has been deleted!", "Message");
@@ -103,11 +102,13 @@ namespace Using_File
 
         private void ClearTextFields()
         {
-            Text_Product_ID.Text = "";
-            Text_Product_Name.Text = "";
-            Text_Product_Price.Text = "";
-            Text_Product_Quantity.Text = "";
-            Text_Product_ID.Focus();
+            foreach (Control control in tableLayoutPanel_Input.Controls)
+            {
+                if (control is TextBox textBox)
+                {
+                    textBox.Text = string.Empty;
+                }
+            }
         }
 
         private void Button_Clear_Click(object sender, EventArgs e)
@@ -118,12 +119,12 @@ namespace Using_File
         private void List_Table_DoubleClick(object sender, EventArgs e)
         {
             var item = List_Table.SelectedItems[0];
-            if (!item.Equals(null))
+            if (item != null)
             {
-                Text_Product_ID.Text = item.SubItems[0].Text;
-                Text_Product_Name.Text = item.SubItems[1].Text;
-                Text_Product_Price.Text = item.SubItems[2].Text;
-                Text_Product_Quantity.Text = item.SubItems[3].Text;
+                Text_Product_ID.Text = item.SubItems[Column_ID.DisplayIndex].Text;
+                Text_Product_Name.Text = item.SubItems[Column_Name.DisplayIndex].Text;
+                Text_Product_Price.Text = item.SubItems[Column_Price.DisplayIndex].Text;
+                Text_Product_Quantity.Text = item.SubItems[Column_Quantity.DisplayIndex].Text;
             }
         }
 
@@ -132,17 +133,18 @@ namespace Using_File
             if (HasFilled(GetTextBoxes()))
             {
                 var id = Text_Product_ID.Text;
-                var new_name = Text_Product_Name.Text;
-                var new_price = Text_Product_Price.Text;
-                var new_quantity = Text_Product_Quantity.Text;
+                var newName = Text_Product_Name.Text;
+                var newPrice = Text_Product_Price.Text;
+                var newQuantity = Text_Product_Quantity.Text;
 
                 foreach (ListViewItem item in List_Table.Items)
                 {
+                    // check the input id
                     if (item.SubItems[Column_ID.DisplayIndex].Text == id)
                     {
-                        item.SubItems[Column_Name.DisplayIndex].Text = new_name;
-                        item.SubItems[Column_Price.DisplayIndex].Text = new_price;
-                        item.SubItems[Column_Quantity.DisplayIndex].Text = new_quantity;
+                        item.SubItems[Column_Name.DisplayIndex].Text = newName;
+                        item.SubItems[Column_Price.DisplayIndex].Text = newPrice;
+                        item.SubItems[Column_Quantity.DisplayIndex].Text = newQuantity;
 
                         break;
                     }
@@ -191,6 +193,8 @@ namespace Using_File
 
                         List_Table.Items.Add(item);
                     }
+
+                    MessageBox.Show("Read completed!","Message");
                 }
             }
         }
@@ -239,6 +243,7 @@ namespace Using_File
             {
                 using (StreamWriter streamWriter = new StreamWriter(fileStream))
                 {
+                    // append only those have recently added
                     foreach (ListViewItem item in List_Table.Items)
                     {
                         if (item.SubItems[Column_IsNew.DisplayIndex].Text == "true")
