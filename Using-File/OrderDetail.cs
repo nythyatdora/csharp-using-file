@@ -9,15 +9,5 @@
         {
 
         }
-
-        public string ToJSON()
-        {
-            string obj = "{ ";
-            obj += $"\"Product\" : {Product.ToJSON()} ";
-            obj += $"\"Amount\" : \"{Amount}\", ";
-            obj += "},";
-
-            return obj;
-        }
     }
 }

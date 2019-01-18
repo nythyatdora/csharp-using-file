@@ -8,11 +8,13 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.IO;
+using Newtonsoft.Json;
 
 namespace Using_File
 {
     public partial class Form_Sub_Main : Form
     {
+        private bool IsWritten;
         private Dictionary<string, Product> Stocks = new Dictionary<string, Product>();
         private Dictionary<string, Order> Orders = new Dictionary<string, Order>();
 
@@ -21,6 +23,7 @@ namespace Using_File
             InitializeComponent();
             ResizeListView();
 
+            IsWritten = true;
             Button_Update.Enabled = false;
             Button_Delete.Enabled = false;
         }
@@ -36,46 +39,6 @@ namespace Using_File
             ResizeListView();
         }
 
-        private string GetJSONValue(string obj, string key)
-        {
-            obj = obj.Substring(1, obj.Length - 3); // remove '}' and ','
-            var attributes = obj.Split(',');
-            var findValue = "";
-            var strIndex = 0;
-
-            foreach (var str in attributes)
-            {
-                var findKey = str.Split(':')[0].Trim();
-                if (findKey.Length > 2)
-                    findKey = findKey.Substring(1, findKey.Length - 2); // remove '"'
-
-                if (findKey == key)
-                {
-                    findValue = str.Split(':')[1].Trim();
-
-                    var isArray = findValue.Contains('[');
-
-                    if (isArray)
-                    {
-                        findValue = "";
-                        findValue = str.Split(':')[1].Trim();
-                        for (var i = strIndex+1; i < attributes.Length; i++)
-                        {
-                            findValue += attributes[i] + ", ";
-                        }
-                    }
-                    else
-                    {
-                        findValue = findValue.Substring(1, findValue.Length - 2); // remove '"'
-                        return findValue;
-                    }
-                }
-
-                strIndex++;
-            }
-            return findValue;
-        }
-
         private void ReadProducts()
         {
             Combo_Product_ID.Items.Add("");
@@ -89,21 +52,9 @@ namespace Using_File
                         {
                             string obj = streamReader.ReadLine();
 
-                            var id = GetJSONValue(obj, "ID");
-                            var name = GetJSONValue(obj, "Name");
-                            var price = GetJSONValue(obj, "Price");
-                            var quantity = GetJSONValue(obj, "Quantity");
-
-                            var product = new Product()
-                            {
-                                ID = id,
-                                Name = name,
-                                Price = Convert.ToDouble(price),
-                                Quantity = Convert.ToInt16(quantity)
-                            };
+                            var product = JsonConvert.DeserializeObject<Product>(obj);
 
                             Stocks.Add(product.ID, product);
-
                             Combo_Product_ID.Items.Add(product.ID);
                         }
                     }
@@ -127,10 +78,8 @@ namespace Using_File
                         while (!streamRead.EndOfStream)
                         {
                             var obj = streamRead.ReadLine();
-
-                            var id = GetJSONValue(obj, "ID");
-                            var orderDetail = GetJSONValue(obj, "OrderDetail");
-
+                            var order = JsonConvert.DeserializeObject<Order>(obj);
+                            Orders.Add(order.ID, order);
                         }
                     }
                 }
@@ -139,11 +88,13 @@ namespace Using_File
             {
                 return;
             }
+
+            UpdateListView();
         }
         
         private void Form_Sub_Main_Load(object sender, EventArgs e)
         {
-            // ReadProducts();
+            ReadProducts();
             ReadFromOrder();
         }
 
@@ -202,32 +153,45 @@ namespace Using_File
             }
         }
 
+        private TextBox[] GetTextBoxes()
+        {
+            var textBoxes = new List<TextBox>();
+            foreach(Control control in TableLayoutPanel_Input.Controls)
+            {
+                if(control is TextBox textBox)
+                {
+                    textBoxes.Add(textBox);
+                }
+            }
+            return textBoxes.ToArray();
+        }
+
+        private bool HasFilled(TextBox[] textBoxes)
+        {
+            bool hasAllFilled = true;
+            foreach (TextBox textBox in textBoxes)
+            {
+                if (string.IsNullOrEmpty(textBox.Text))
+                {
+                    hasAllFilled = false;
+                    break;
+                }
+            }
+            return hasAllFilled;
+        }
+
         private void Button_Add_Click(object sender, EventArgs e)
         {
-            var orderId = Text_Order_ID.Text;
-            var selectedProduct = Combo_Product_ID.SelectedItem.ToString();
-            var product = Stocks[selectedProduct];
-            var amount = Text_Amount.Text;
-
-            var isOrdered = Orders.ContainsKey(orderId);       
-
-            if (!isOrdered)
+            if (HasFilled(GetTextBoxes())) // all textboxes are filled
             {
-                var orderDetail = new OrderDetail()
-                {
-                    Product = product,
-                    Amount = Convert.ToInt16(amount),
-                };
+                var orderId = Text_Order_ID.Text;
+                var selectedProduct = Combo_Product_ID.SelectedItem.ToString();
+                var product = Stocks[selectedProduct];
+                var amount = Text_Amount.Text;
 
-                var order = new Order() { ID = orderId };
-                order.AddOrderDetail(orderDetail);
+                var isOrdered = Orders.ContainsKey(orderId);
 
-                Orders.Add(order.ID, order);
-            }
-            else
-            {
-                var hasProduct = Orders[orderId].Details.ContainsKey(selectedProduct);
-                if (!hasProduct)
+                if (!isOrdered)
                 {
                     var orderDetail = new OrderDetail()
                     {
@@ -235,53 +199,34 @@ namespace Using_File
                         Amount = Convert.ToInt16(amount),
                     };
 
-                    Orders[orderId].AddOrderDetail(orderDetail);
+                    var order = new Order() {ID = orderId};
+                    order.AddOrderDetail(orderDetail);
+
+                    Orders.Add(order.ID, order);
                 }
                 else
                 {
-                    Orders[orderId].Details[selectedProduct].Amount += Convert.ToInt16(amount);
+                    var hasProduct = Orders[orderId].Details.ContainsKey(selectedProduct);
+                    if (!hasProduct)
+                    {
+                        var orderDetail = new OrderDetail()
+                        {
+                            Product = product,
+                            Amount = Convert.ToInt16(amount),
+                        };
+
+                        Orders[orderId].AddOrderDetail(orderDetail);
+                    }
+                    else
+                    {
+                        Orders[orderId].Details[selectedProduct].Amount += Convert.ToInt16(amount);
+                    }
                 }
+
+                IsWritten = false;
+                UpdateListView();
+                ClearAllFields();
             }
-
-            UpdateListView();
-            ClearAllFields();
-        }
-
-        private void ListView_Table_MouseDoubleClick(object sender, MouseEventArgs e)
-        {
-            var item = ListView_Table.SelectedItems[0];
-            if (item != null)
-            {
-                Text_Order_ID.Text = item.SubItems[Column_Order_ID.DisplayIndex].Text;
-
-                var productId = item.SubItems[Column_Product_ID.DisplayIndex].Text;
-
-                Combo_Product_ID.SelectedItem = productId;
-                Text_Product_Name.Text = Stocks[productId].Name;
-                Text_Product_Price.Text = Stocks[productId].Price.ToString();
-                Text_Product_Quantity_In_Stock.Text = Stocks[productId].Quantity.ToString();
-                Text_Amount.Text = item.SubItems[Column_Amount.DisplayIndex].Text;
-
-                Button_Add.Enabled = false;
-                Button_Update.Enabled = true;
-                Button_Delete.Enabled = true;
-            }
-        }
-
-        private void Button_Update_Click(object sender, EventArgs e)
-        {
-            var orderId = Text_Order_ID.Text;
-            var newAmount = Text_Amount.Text;
-            var selectedProduct = Combo_Product_ID.SelectedItem.ToString();
-
-            Orders[orderId].Details[selectedProduct].Amount = Convert.ToInt16(newAmount);
-            
-            UpdateListView();
-            ClearAllFields();
-
-            Button_Add.Enabled = true;
-            Button_Update.Enabled = false;
-            Button_Delete.Enabled = false;
         }
 
         private void Button_Clear_Click(object sender, EventArgs e)
@@ -308,6 +253,22 @@ namespace Using_File
             Button_Delete.Enabled = false;
         }
 
+        private void Button_Update_Click(object sender, EventArgs e)
+        {
+            var orderId = Text_Order_ID.Text;
+            var newAmount = Text_Amount.Text;
+            var selectedProduct = Combo_Product_ID.SelectedItem.ToString();
+
+            Orders[orderId].Details[selectedProduct].Amount = Convert.ToInt16(newAmount);
+            
+            UpdateListView();
+            ClearAllFields();
+
+            Button_Add.Enabled = true;
+            Button_Update.Enabled = false;
+            Button_Delete.Enabled = false;
+        }
+
         private void Button_Save_Click(object sender, EventArgs e)
         {
             using (var fileStream = new FileStream("OrderList.txt", FileMode.Create))
@@ -317,8 +278,53 @@ namespace Using_File
                     foreach (KeyValuePair<string, Order> valuePairOrder in Orders)
                     {
                         var order = valuePairOrder.Value;
-                        streamWriter.WriteLine(order.ToJSON());
+                        var jsonOrder = JsonConvert.SerializeObject(order);
+                        streamWriter.WriteLine(jsonOrder);
                     }
+
+                    IsWritten = true;
+                    MessageBox.Show("Data has been written!", "Message");
+                }
+            }
+        }
+
+        private void ListView_Table_MouseDoubleClick(object sender, MouseEventArgs e)
+        {
+            var item = ListView_Table.SelectedItems[0];
+            if (item != null)
+            {
+                Text_Order_ID.Text = item.SubItems[Column_Order_ID.DisplayIndex].Text;
+
+                var productId = item.SubItems[Column_Product_ID.DisplayIndex].Text;
+
+                Combo_Product_ID.SelectedItem = productId;
+                Text_Product_Name.Text = Stocks[productId].Name;
+                Text_Product_Price.Text = Stocks[productId].Price.ToString();
+                Text_Product_Quantity_In_Stock.Text = Stocks[productId].Quantity.ToString();
+                Text_Amount.Text = item.SubItems[Column_Amount.DisplayIndex].Text;
+
+                Button_Add.Enabled = false;
+                Button_Update.Enabled = true;
+                Button_Delete.Enabled = true;
+            }
+        }
+
+        private void Form_Sub_Main_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            if (!IsWritten)
+            {
+                var respond = MessageBox.Show("There is unsaved data.\nAre you sure, you want to discard?", 
+                    "Message",
+                    MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+
+                switch (respond)
+                {
+                    case DialogResult.Yes:
+                        e.Cancel = false;
+                        break;
+                    case DialogResult.No:
+                        e.Cancel = true;
+                        break;
                 }
             }
         }

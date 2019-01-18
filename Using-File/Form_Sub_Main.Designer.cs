@@ -432,7 +432,8 @@
             this.ClientSize = new System.Drawing.Size(784, 561);
             this.Controls.Add(this.tableLayoutPanel1);
             this.Name = "Form_Sub_Main";
-            this.Text = "Form_Main";
+            this.Text = "Form_Sub_Main";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form_Sub_Main_FormClosing);
             this.Load += new System.EventHandler(this.Form_Sub_Main_Load);
             this.Resize += new System.EventHandler(this.Form_Sub_Main_Resize);
             this.tableLayoutPanel1.ResumeLayout(false);

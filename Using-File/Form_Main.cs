@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.IO;
+using Newtonsoft.Json;
 
 namespace Using_File
 {
@@ -61,7 +62,7 @@ namespace Using_File
         private TextBox[] GetTextBoxes()
         {
             var textBoxes = new List<TextBox>();
-            foreach(Control control in tableLayoutPanel_Input.Controls)
+            foreach(Control control in TableLayoutPanel_Input.Controls)
             {
                 if(control is TextBox textBox)
                 {
@@ -110,7 +111,6 @@ namespace Using_File
             }
         }
 
-
         private bool  HasSelectedItem => ListView_Table.SelectedIndices.Count != 0;
 
         private void Button_Delete_Click(object sender, EventArgs e)
@@ -128,7 +128,7 @@ namespace Using_File
 
         private void ClearTextFields()
         {
-            foreach (Control control in tableLayoutPanel_Input.Controls)
+            foreach (Control control in TableLayoutPanel_Input.Controls)
             {
                 if (control is TextBox textBox)
                 {
@@ -166,27 +166,6 @@ namespace Using_File
             }
         }
 
-        private string GetJSONValue(string obj, string key)
-        {
-            obj = obj.Substring(1, obj.Length - 3); // remove '}' and ','
-            string[] attributes = obj.Split(',');
-            string f_value = "";
-
-            foreach(string str in attributes)
-            {
-                string f_key = str.Split(':')[0].Trim();
-                f_key = f_key.Substring(1, f_key.Length - 2); // remove '"'
-                
-                if(f_key == key)
-                {
-                    f_value = str.Split(':')[1].Trim();
-                    f_value = f_value.Substring(1, f_value.Length - 2); // remove '"'
-                    return f_value;
-                }
-            }
-            return f_value;
-        }
-
         private void ReadFromFile()
         {
             ListView_Table.Items.Clear();
@@ -201,15 +180,12 @@ namespace Using_File
                         {
                             string obj = streamRead.ReadLine();
 
-                            var id = GetJSONValue(obj, "ID");
-                            var name = GetJSONValue(obj, "Name");
-                            var price = GetJSONValue(obj, "Price");
-                            var quantity = GetJSONValue(obj, "Quantity");
+                            var product = JsonConvert.DeserializeObject<Product>(obj);
 
-                            var item = new ListViewItem(id);
-                            item.SubItems.Add(name);
-                            item.SubItems.Add(price);
-                            item.SubItems.Add(quantity);
+                            var item = new ListViewItem(product.ID);
+                            item.SubItems.Add(product.Name);
+                            item.SubItems.Add(product.Price.ToString());
+                            item.SubItems.Add(product.Quantity.ToString());
                             item.SubItems.Add("false");
 
                             ListView_Table.Items.Add(item);
@@ -246,7 +222,9 @@ namespace Using_File
                             Quantity = Convert.ToInt16(item.SubItems[Column_Quantity.DisplayIndex].Text)
                         };
 
-                        streamWriter.WriteLine(product.ToJSON());
+                        var jsonProduct = JsonConvert.SerializeObject(product);
+
+                        streamWriter.WriteLine(jsonProduct);
                     }
 
                     IsWritten = true;

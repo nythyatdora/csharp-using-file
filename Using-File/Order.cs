@@ -20,29 +20,5 @@ namespace Using_File
         {
             Details.Add(orderDetail.Product.ID, orderDetail);
         }
-
-        public string ToJSON()
-        {
-            string obj = "{ ";
-            obj += $"\"ID\" : \"{ID}\", ";
-
-            foreach (KeyValuePair<string, OrderDetail> keyValuePairDetail in Details)
-            {
-                var key = keyValuePairDetail.Key;
-                var value = keyValuePairDetail.Value;
-                if (value == Details.Values.ElementAt(0))
-                {
-                    obj += $"\"OrderDetail\" : [{Details[key].ToJSON()} ";
-                }
-                else
-                {
-                    obj += $"{Details[key].ToJSON()} ";
-                }
-            }
-
-            obj += "], },";
-
-            return obj;
-        }
     }
 }

@@ -36,7 +36,7 @@
             this.Button_Update = new System.Windows.Forms.Button();
             this.Button_Save = new System.Windows.Forms.Button();
             this.tableLayoutPanel4 = new System.Windows.Forms.TableLayoutPanel();
-            this.tableLayoutPanel_Input = new System.Windows.Forms.TableLayoutPanel();
+            this.TableLayoutPanel_Input = new System.Windows.Forms.TableLayoutPanel();
             this.Label_Product_ID = new System.Windows.Forms.Label();
             this.Label_Product_Name = new System.Windows.Forms.Label();
             this.Label_Product_Price = new System.Windows.Forms.Label();
@@ -54,7 +54,7 @@
             this.tableLayoutPanel2.SuspendLayout();
             this.tableLayoutPanel3.SuspendLayout();
             this.tableLayoutPanel4.SuspendLayout();
-            this.tableLayoutPanel_Input.SuspendLayout();
+            this.TableLayoutPanel_Input.SuspendLayout();
             this.SuspendLayout();
             // 
             // tableLayoutPanel1
@@ -173,7 +173,7 @@
             // 
             this.tableLayoutPanel4.ColumnCount = 1;
             this.tableLayoutPanel4.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel4.Controls.Add(this.tableLayoutPanel_Input, 0, 0);
+            this.tableLayoutPanel4.Controls.Add(this.TableLayoutPanel_Input, 0, 0);
             this.tableLayoutPanel4.Controls.Add(this.ListView_Table, 1, 1);
             this.tableLayoutPanel4.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel4.Location = new System.Drawing.Point(0, 0);
@@ -185,33 +185,33 @@
             this.tableLayoutPanel4.Size = new System.Drawing.Size(564, 504);
             this.tableLayoutPanel4.TabIndex = 1;
             // 
-            // tableLayoutPanel_Input
+            // TableLayoutPanel_Input
             // 
-            this.tableLayoutPanel_Input.ColumnCount = 2;
-            this.tableLayoutPanel_Input.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tableLayoutPanel_Input.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tableLayoutPanel_Input.Controls.Add(this.Label_Product_ID, 0, 0);
-            this.tableLayoutPanel_Input.Controls.Add(this.Label_Product_Name, 0, 1);
-            this.tableLayoutPanel_Input.Controls.Add(this.Label_Product_Price, 0, 2);
-            this.tableLayoutPanel_Input.Controls.Add(this.Label_Product_Quantity, 0, 3);
-            this.tableLayoutPanel_Input.Controls.Add(this.Text_Product_ID, 1, 0);
-            this.tableLayoutPanel_Input.Controls.Add(this.Text_Product_Name, 1, 1);
-            this.tableLayoutPanel_Input.Controls.Add(this.Text_Product_Price, 1, 2);
-            this.tableLayoutPanel_Input.Controls.Add(this.Text_Product_Quantity, 1, 3);
-            this.tableLayoutPanel_Input.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tableLayoutPanel_Input.Location = new System.Drawing.Point(0, 0);
-            this.tableLayoutPanel_Input.Margin = new System.Windows.Forms.Padding(0);
-            this.tableLayoutPanel_Input.Name = "tableLayoutPanel_Input";
-            this.tableLayoutPanel_Input.RowCount = 4;
-            this.tableLayoutPanel_Input.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 25F));
-            this.tableLayoutPanel_Input.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 25F));
-            this.tableLayoutPanel_Input.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 25F));
-            this.tableLayoutPanel_Input.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 25F));
-            this.tableLayoutPanel_Input.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
-            this.tableLayoutPanel_Input.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
-            this.tableLayoutPanel_Input.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
-            this.tableLayoutPanel_Input.Size = new System.Drawing.Size(564, 201);
-            this.tableLayoutPanel_Input.TabIndex = 1;
+            this.TableLayoutPanel_Input.ColumnCount = 2;
+            this.TableLayoutPanel_Input.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.TableLayoutPanel_Input.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.TableLayoutPanel_Input.Controls.Add(this.Label_Product_ID, 0, 0);
+            this.TableLayoutPanel_Input.Controls.Add(this.Label_Product_Name, 0, 1);
+            this.TableLayoutPanel_Input.Controls.Add(this.Label_Product_Price, 0, 2);
+            this.TableLayoutPanel_Input.Controls.Add(this.Label_Product_Quantity, 0, 3);
+            this.TableLayoutPanel_Input.Controls.Add(this.Text_Product_ID, 1, 0);
+            this.TableLayoutPanel_Input.Controls.Add(this.Text_Product_Name, 1, 1);
+            this.TableLayoutPanel_Input.Controls.Add(this.Text_Product_Price, 1, 2);
+            this.TableLayoutPanel_Input.Controls.Add(this.Text_Product_Quantity, 1, 3);
+            this.TableLayoutPanel_Input.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.TableLayoutPanel_Input.Location = new System.Drawing.Point(0, 0);
+            this.TableLayoutPanel_Input.Margin = new System.Windows.Forms.Padding(0);
+            this.TableLayoutPanel_Input.Name = "TableLayoutPanel_Input";
+            this.TableLayoutPanel_Input.RowCount = 4;
+            this.TableLayoutPanel_Input.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 25F));
+            this.TableLayoutPanel_Input.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 25F));
+            this.TableLayoutPanel_Input.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 25F));
+            this.TableLayoutPanel_Input.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 25F));
+            this.TableLayoutPanel_Input.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
+            this.TableLayoutPanel_Input.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
+            this.TableLayoutPanel_Input.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
+            this.TableLayoutPanel_Input.Size = new System.Drawing.Size(564, 201);
+            this.TableLayoutPanel_Input.TabIndex = 1;
             // 
             // Label_Product_ID
             // 
@@ -358,8 +358,8 @@
             this.tableLayoutPanel2.ResumeLayout(false);
             this.tableLayoutPanel3.ResumeLayout(false);
             this.tableLayoutPanel4.ResumeLayout(false);
-            this.tableLayoutPanel_Input.ResumeLayout(false);
-            this.tableLayoutPanel_Input.PerformLayout();
+            this.TableLayoutPanel_Input.ResumeLayout(false);
+            this.TableLayoutPanel_Input.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -374,7 +374,7 @@
         private System.Windows.Forms.Button Button_Update;
         private System.Windows.Forms.Button Button_Save;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel4;
-        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel_Input;
+        private System.Windows.Forms.TableLayoutPanel TableLayoutPanel_Input;
         private System.Windows.Forms.Label Label_Product_Name;
         private System.Windows.Forms.Label Label_Product_Price;
         private System.Windows.Forms.Label Label_Product_Quantity;
