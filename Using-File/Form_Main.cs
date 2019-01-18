@@ -13,6 +13,8 @@ namespace Using_File
 {
     public partial class Form_Main : Form
     {
+        private bool IsWritten = true;
+
         public Form_Main()
         {
             InitializeComponent();
@@ -20,13 +22,35 @@ namespace Using_File
 
         private void ResizeListView ()
         {
-            for (int i = 0; i < List_Table.Columns.Count; i++)
-                List_Table.Columns[i].Width = List_Table.Size.Width / 4;
+            for (int i = 0; i < ListView_Table.Columns.Count; i++)
+                ListView_Table.Columns[i].Width = ListView_Table.Size.Width / 4;
         }
 
         private void Form_Load(object sender, EventArgs e)
         {
             ResizeListView();
+
+            ReadFromFile();
+        }
+
+        private void Form_Main_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            if (!IsWritten)
+            {
+                var respond = MessageBox.Show("There is unsaved data.\nAre you sure, you want to discard?", 
+                    "Message",
+                    MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+
+                switch (respond)
+                {
+                    case DialogResult.Yes:
+                        e.Cancel = false;
+                        break;
+                    case DialogResult.No:
+                        e.Cancel = true;
+                        break;
+                }
+            }
         }
 
         private void Form_Resize(object sender, EventArgs e)
@@ -76,7 +100,9 @@ namespace Using_File
                 row.SubItems.Add(quantity);
                 row.SubItems.Add("true");
 
-                List_Table.Items.Add(row);
+                ListView_Table.Items.Add(row);
+
+                IsWritten = false;
 
                 MessageBox.Show("Data has been added!","Message");
 
@@ -84,17 +110,17 @@ namespace Using_File
             }
         }
 
-        private bool HasSelectedItem()
-        {
-            return List_Table.SelectedIndices.Count != 0;
-        }
+
+        private bool  HasSelectedItem => ListView_Table.SelectedIndices.Count != 0;
 
         private void Button_Delete_Click(object sender, EventArgs e)
         {
-            if (HasSelectedItem())
+            if (HasSelectedItem)
             {
-                var item = List_Table.SelectedItems[0]; // select only one item that being focused on
-                List_Table.Items.Remove(item);
+                var item = ListView_Table.SelectedItems[0];
+                ListView_Table.Items.Remove(item);
+
+                WriteToFile();
 
                 MessageBox.Show("Selected item has been deleted!", "Message");
             }
@@ -111,23 +137,6 @@ namespace Using_File
             }
         }
 
-        private void Button_Clear_Click(object sender, EventArgs e)
-        {
-            ClearTextFields();
-        }
-
-        private void List_Table_DoubleClick(object sender, EventArgs e)
-        {
-            var item = List_Table.SelectedItems[0];
-            if (item != null)
-            {
-                Text_Product_ID.Text = item.SubItems[Column_ID.DisplayIndex].Text;
-                Text_Product_Name.Text = item.SubItems[Column_Name.DisplayIndex].Text;
-                Text_Product_Price.Text = item.SubItems[Column_Price.DisplayIndex].Text;
-                Text_Product_Quantity.Text = item.SubItems[Column_Quantity.DisplayIndex].Text;
-            }
-        }
-
         private void Button_Update_Click(object sender, EventArgs e)
         {
             if (HasFilled(GetTextBoxes()))
@@ -137,7 +146,7 @@ namespace Using_File
                 var newPrice = Text_Product_Price.Text;
                 var newQuantity = Text_Product_Quantity.Text;
 
-                foreach (ListViewItem item in List_Table.Items)
+                foreach (ListViewItem item in ListView_Table.Items)
                 {
                     // check the input id
                     if (item.SubItems[Column_ID.DisplayIndex].Text == id)
@@ -149,67 +158,89 @@ namespace Using_File
                         break;
                     }
                 }
+
+                WriteToFile();
+                ClearTextFields();
+
+                MessageBox.Show("Data has been updated!", "Message");
             }
         }
 
-        private string GetJSONValue(String obj, String key)
+        private string GetJSONValue(string obj, string key)
         {
-            obj = obj.Substring(1, obj.Length - 2); // remove '}' and ','
-            String[] attributes = obj.Split(',');
+            obj = obj.Substring(1, obj.Length - 3); // remove '}' and ','
+            string[] attributes = obj.Split(',');
             string f_value = "";
 
-            foreach(String str in attributes)
+            foreach(string str in attributes)
             {
-                String f_key = str.Trim().Split(':')[0];
+                string f_key = str.Split(':')[0].Trim();
+                f_key = f_key.Substring(1, f_key.Length - 2); // remove '"'
+                
                 if(f_key == key)
                 {
-                    return str.Trim().Split('"')[1];
+                    f_value = str.Split(':')[1].Trim();
+                    f_value = f_value.Substring(1, f_value.Length - 2); // remove '"'
+                    return f_value;
                 }
             }
             return f_value;
         }
 
-        private void Button_Read_Click(object sender, EventArgs e)
+        private void ReadFromFile()
         {
-            List_Table.Items.Clear();
-            using (FileStream fileStream = new FileStream("ProductList.txt", FileMode.Open))
+            ListView_Table.Items.Clear();
+
+            try
             {
-                using (StreamReader streamRead = new StreamReader(fileStream))
+                using (var fileStream = new FileStream("ProductList.txt", FileMode.Open))
                 {
-                    while(!streamRead.EndOfStream)
+                    using (var streamRead = new StreamReader(fileStream))
                     {
-                        String items = streamRead.ReadLine();
+                        while (!streamRead.EndOfStream)
+                        {
+                            string obj = streamRead.ReadLine();
 
-                        var id = GetJSONValue(items, "ID");
-                        var name = GetJSONValue(items, "Name");
-                        var price = GetJSONValue(items, "Price");
-                        var quantity = GetJSONValue(items, "Quantity");
+                            var id = GetJSONValue(obj, "ID");
+                            var name = GetJSONValue(obj, "Name");
+                            var price = GetJSONValue(obj, "Price");
+                            var quantity = GetJSONValue(obj, "Quantity");
 
-                        var item = new ListViewItem(id);
-                        item.SubItems.Add(name);
-                        item.SubItems.Add(price);
-                        item.SubItems.Add(quantity);
-                        item.SubItems.Add("false");
+                            var item = new ListViewItem(id);
+                            item.SubItems.Add(name);
+                            item.SubItems.Add(price);
+                            item.SubItems.Add(quantity);
+                            item.SubItems.Add("false");
 
-                        List_Table.Items.Add(item);
+                            ListView_Table.Items.Add(item);
+                        }
+
+                        // MessageBox.Show("Read completed!","Message");
                     }
-
-                    MessageBox.Show("Read completed!","Message");
                 }
             }
+            catch (FileNotFoundException)
+            {
+                return;
+            }
+        }
+
+        private void Button_Read_Click(object sender, EventArgs e)
+        {
+            ReadFromFile();
         }
 
         private void WriteToFile()
         {
-            using (FileStream fileStream = new FileStream("ProductList.txt", FileMode.Create))
+            using (var fileStream = new FileStream("ProductList.txt", FileMode.Create))
             {
-                using (StreamWriter streamWriter = new StreamWriter(fileStream))
+                using (var streamWriter = new StreamWriter(fileStream))
                 {
-                    foreach (ListViewItem item in List_Table.Items)
+                    foreach (ListViewItem item in ListView_Table.Items)
                     {
                         var product = new Product()
                         {
-                            ID = Convert.ToInt16(item.SubItems[Column_ID.DisplayIndex].Text),
+                            ID = item.SubItems[Column_ID.DisplayIndex].Text,
                             Name = item.SubItems[Column_Name.DisplayIndex].Text,
                             Price = Convert.ToDouble(item.SubItems[Column_Price.DisplayIndex].Text),
                             Quantity = Convert.ToInt16(item.SubItems[Column_Quantity.DisplayIndex].Text)
@@ -217,15 +248,18 @@ namespace Using_File
 
                         streamWriter.WriteLine(product.ToJSON());
                     }
+
+                    IsWritten = true;
+                    // MessageBox.Show("Data has been written!", "Message");
                 }
             }
         }
 
-        private void Button_Write_Click(object sender, EventArgs e)
+        private void Button_Save_Click(object sender, EventArgs e)
         {
-            var result = MessageBox.Show("Are you sure, you want to write a new file?", "Message", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            var result = MessageBox.Show("Are you sure, you want to save new data?", "Message", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
 
-            switch(result)
+            switch (result)
             {
                 case DialogResult.Yes:
                     WriteToFile();
@@ -237,51 +271,16 @@ namespace Using_File
             }
         }
 
-        private void AppendToFile()
+        private void ListView_Table_MouseDoubleClick(object sender, MouseEventArgs e)
         {
-            using (FileStream fileStream = new FileStream("ProductList.txt", FileMode.Append))
+            var item = ListView_Table.SelectedItems[0];
+            if (item != null)
             {
-                using (StreamWriter streamWriter = new StreamWriter(fileStream))
-                {
-                    // append only those have recently added
-                    foreach (ListViewItem item in List_Table.Items)
-                    {
-                        if (item.SubItems[Column_IsNew.DisplayIndex].Text == "true")
-                        {
-                            var product = new Product()
-                            {
-                                ID = Convert.ToInt16(item.SubItems[Column_ID.DisplayIndex].Text),
-                                Name = item.SubItems[Column_Name.DisplayIndex].Text,
-                                Price = Convert.ToDouble(item.SubItems[Column_Price.DisplayIndex].Text),
-                                Quantity = Convert.ToInt16(item.SubItems[Column_Quantity.DisplayIndex].Text)
-                            };
-
-                            streamWriter.WriteLine(product.ToJSON());
-                        }
-                    }
-                }
+                Text_Product_ID.Text = item.SubItems[Column_ID.DisplayIndex].Text;
+                Text_Product_Name.Text = item.SubItems[Column_Name.DisplayIndex].Text;
+                Text_Product_Price.Text = item.SubItems[Column_Price.DisplayIndex].Text;
+                Text_Product_Quantity.Text = item.SubItems[Column_Quantity.DisplayIndex].Text;
             }
-        }
-
-        private void Button_Append_Click(object sender, EventArgs e)
-        {
-            var result = MessageBox.Show("Are you sure, you want to append new data?", "Message", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-
-            switch (result)
-            {
-                case DialogResult.Yes:
-                    AppendToFile();
-                    break;
-
-                case DialogResult.No:
-                    MessageBox.Show("Cancel!", "Message");
-                    break;
-            }
-        }
-
-        private void Button_Clear_Table_Click(object sender, EventArgs e)
-        {
-            List_Table.Items.Clear();
         }
     }
 }
